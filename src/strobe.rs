@@ -15,8 +15,24 @@ const FLAG_T: u8 = 1 << 3;
 const FLAG_M: u8 = 1 << 4;
 const FLAG_K: u8 = 1 << 5;
 
-fn transmute_state(st: &mut AlignedKeccakState) -> &mut [u64; 25] {
-    unsafe { &mut *(st as *mut AlignedKeccakState as *mut [u64; 25]) }
+const KECCAK_BLOCK_SIZE: usize = 25;
+
+fn keccakf_u8(st: &mut AlignedKeccakState) {
+    #[cfg(target_endian = "big")]
+    {
+        use byteorder::{ByteOrder, LittleEndian};
+        let mut keccak_block = [0u64; KECCAK_BLOCK_SIZE];
+        LittleEndian::read_u64_into(&st.0, &mut keccak_block);
+        keccak::f1600(&mut keccak_block);
+        LittleEndian::write_u64_into(&keccak_block, &mut st.0);
+    }
+    #[cfg(target_endian = "little")]
+    {
+        fn transmute_state(st: &mut AlignedKeccakState) -> &mut [u64; KECCAK_BLOCK_SIZE] {
+            unsafe { &mut *(st as *mut AlignedKeccakState as *mut [u64; KECCAK_BLOCK_SIZE]) }
+        }
+        keccak::f1600(transmute_state(st));
+    }
 }
 
 /// This is a wrapper around 200-byte buffer that's always 8-byte aligned
@@ -51,7 +67,7 @@ impl Strobe128 {
             let mut st = AlignedKeccakState([0u8; 200]);
             st[0..6].copy_from_slice(&[1, STROBE_R + 2, 1, 0, 1, 96]);
             st[6..18].copy_from_slice(b"STROBEv1.0.2");
-            keccak::f1600(transmute_state(&mut st));
+            keccakf_u8(&mut st);
 
             st
         };
@@ -94,7 +110,7 @@ impl Strobe128 {
         self.state[self.pos as usize] ^= self.pos_begin;
         self.state[(self.pos + 1) as usize] ^= 0x04;
         self.state[(STROBE_R + 1) as usize] ^= 0x80;
-        keccak::f1600(transmute_state(&mut self.state));
+        keccakf_u8(&mut self.state);
         self.pos = 0;
         self.pos_begin = 0;
     }
