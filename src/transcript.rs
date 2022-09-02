@@ -66,7 +66,7 @@ impl Transcript {
     /// **not by the proof implementation**.  See the [Passing
     /// Transcripts](https://merlin.cool/use/passing.html) section of
     /// the Merlin website for more details on why.
-    pub fn new(label: &'static [u8]) -> Transcript {
+    pub fn new(label: &[u8]) -> Transcript {
         use crate::constants::MERLIN_PROTOCOL_LABEL;
 
         #[cfg(feature = "debug-transcript")]
@@ -93,7 +93,7 @@ impl Transcript {
     /// also appended to the transcript.  See the [Transcript
     /// Protocols](https://merlin.cool/use/protocol.html) section of
     /// the Merlin website for details on labels.
-    pub fn append_message(&mut self, label: &'static [u8], message: &[u8]) {
+    pub fn append_message(&mut self, label: &[u8], message: &[u8]) {
         let data_len = encode_usize_as_u32(message.len());
         self.strobe.meta_ad(label, false);
         self.strobe.meta_ad(&data_len, true);
@@ -137,7 +137,7 @@ impl Transcript {
     /// This is intended to avoid any possible confusion between the
     /// transcript-level messages and protocol-level commitments.
     #[deprecated(since = "1.1.0", note = "renamed to append_message for clarity.")]
-    pub fn commit_bytes(&mut self, label: &'static [u8], message: &[u8]) {
+    pub fn commit_bytes(&mut self, label: &[u8], message: &[u8]) {
         self.append_message(label, message);
     }
 
@@ -152,7 +152,7 @@ impl Transcript {
     ///
     /// Calls `append_message` with the 8-byte little-endian encoding
     /// of `x`.
-    pub fn append_u64(&mut self, label: &'static [u8], x: u64) {
+    pub fn append_u64(&mut self, label: &[u8], x: u64) {
         self.append_message(label, &encode_u64(x));
     }
 
@@ -162,7 +162,7 @@ impl Transcript {
     /// This is intended to avoid any possible confusion between the
     /// transcript-level messages and protocol-level commitments.
     #[deprecated(since = "1.1.0", note = "renamed to append_u64 for clarity.")]
-    pub fn commit_u64(&mut self, label: &'static [u8], x: u64) {
+    pub fn commit_u64(&mut self, label: &[u8], x: u64) {
         self.append_u64(label, x);
     }
 
@@ -172,7 +172,7 @@ impl Transcript {
     /// also appended to the transcript.  See the [Transcript
     /// Protocols](https://merlin.cool/use/protocol.html) section of
     /// the Merlin website for details on labels.
-    pub fn challenge_bytes(&mut self, label: &'static [u8], dest: &mut [u8]) {
+    pub fn challenge_bytes(&mut self, label: &[u8], dest: &mut [u8]) {
         let data_len = encode_usize_as_u32(dest.len());
         self.strobe.meta_ad(label, false);
         self.strobe.meta_ad(&data_len, true);
@@ -288,7 +288,7 @@ impl TranscriptRngBuilder {
     /// The `label` parameter is metadata about `witness`.
     pub fn rekey_with_witness_bytes(
         mut self,
-        label: &'static [u8],
+        label: &[u8],
         witness: &[u8],
     ) -> TranscriptRngBuilder {
         let witness_len = encode_usize_as_u32(witness.len());
@@ -310,7 +310,7 @@ impl TranscriptRngBuilder {
     )]
     pub fn commit_witness_bytes(
         self,
-        label: &'static [u8],
+        label: &[u8],
         witness: &[u8],
     ) -> TranscriptRngBuilder {
         self.rekey_with_witness_bytes(label, witness)
