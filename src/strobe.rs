@@ -24,7 +24,7 @@ fn transmute_state(st: &mut AlignedKeccakState) -> &mut [u64; 25] {
 /// (since u64 words must be 8-byte aligned)
 #[derive(Clone, Zeroize)]
 #[zeroize(drop)]
-#[repr(align(8))]
+#[repr(C, align(8))]
 struct AlignedKeccakState([u8; 200]);
 
 /// A Strobe context for the 128-bit security level.
