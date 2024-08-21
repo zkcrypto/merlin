@@ -37,4 +37,4 @@ rand_chacha = "0.3"
 default = ["std"]
 nightly = []
 debug-transcript = ["hex"]
-std = ["rand_core/std", "byteorder/std"]
+std = ["rand_core/alloc", "byteorder/std"]
