@@ -53,7 +53,7 @@ jobs:
   #     - name: Build
   #       uses: actions-rs/cargo@v1
   #       with:
-  #         # see https://github.com/rust-embedded/cross
+  #         # see https://github.com/cross-rs/cross
   #         use-cross: true
   #         command: build
   #         args: --target ${{ matrix.rust_target }}
